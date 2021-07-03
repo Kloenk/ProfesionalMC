@@ -1,6 +1,6 @@
-package com.example.profession_example_mod.command;
+package dev.kloenk.mc.professionalmc.command;
 
-import com.example.profession_example_mod.profession.MerchantProfession;
+import dev.kloenk.mc.professionalmc.profession.MerchantProfession;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -10,8 +10,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import org.samo_lego.taterzens.api.TaterzensAPI;
-import org.samo_lego.taterzens.interfaces.TaterzenEditor;
+import org.samo_lego.taterzens.interfaces.ITaterzenEditor;
 import org.samo_lego.taterzens.npc.TaterzenNPC;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -24,6 +23,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class MerchantCommand {
     private static final Text HOORAY_MSG = new LiteralText("Success!").formatted(Formatting.GREEN);
     private static final Text PROFESSION_NOT_SET = new LiteralText("This taterzen lacks " + MerchantProfession.PROFESSION_ID + " profession!");
+    private static final Text NO_NPC_SELECTED = new LiteralText("You have to select Taterzen first");
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher, boolean dedicated) {
         dispatcher.register(literal("merchant")
@@ -45,7 +45,7 @@ public class MerchantCommand {
 
     private static int editPaymentCount(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         ServerCommandSource source = ctx.getSource();
-        TaterzenNPC taterzen = ((TaterzenEditor)source.getPlayer()).getNpc();
+        TaterzenNPC taterzen = ((ITaterzenEditor)source.getPlayer()).getNpc();
         if (taterzen != null) {
             int throwCount = IntegerArgumentType.getInteger(ctx, "throw count");
 
@@ -59,14 +59,15 @@ public class MerchantCommand {
             }
         } else {
             // Error for no selected Taterzen is already available
-            source.sendError(TaterzensAPI.noSelectedTaterzenError());
+            source.sendError(NO_NPC_SELECTED);
+            //source.sendError(TaterzensAPI.noSelectedTaterzenError());
         }
         return 0;
     }
 
     private static int editPunchMessage(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
         ServerCommandSource source = ctx.getSource();
-        TaterzenNPC taterzen = ((TaterzenEditor)source.getPlayer()).getNpc();
+        TaterzenNPC taterzen = ((ITaterzenEditor)source.getPlayer()).getNpc();
         if (taterzen != null) {
             String ouchMessage = MessageArgumentType.getMessage(ctx, "new ouch message").getString();
 
@@ -80,7 +81,7 @@ public class MerchantCommand {
             }
         } else {
             // Error for no selected Taterzen is already available
-            source.sendError(TaterzensAPI.noSelectedTaterzenError());
+            source.sendError(NO_NPC_SELECTED);
         }
         return 0;
     }
