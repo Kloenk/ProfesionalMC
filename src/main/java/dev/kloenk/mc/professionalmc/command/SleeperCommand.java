@@ -2,6 +2,7 @@ package dev.kloenk.mc.professionalmc.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -52,6 +53,13 @@ public class SleeperCommand {
                                         .executes(SleeperCommand::setBedPos)
                             )
                             .executes(SleeperCommand::getBedPos)
+                    )
+                    .then(literal("bedrequired")
+                            .then(
+                                    argument("required", BoolArgumentType.bool())
+                                        .executes(SleeperCommand::setRequireBed)
+                            )
+                            .executes(SleeperCommand::getRequireBed)
                     )
             )
         );
@@ -166,6 +174,47 @@ public class SleeperCommand {
                 BlockPos pos = profession.getBedPosition();
                 Text text = new LiteralText("Bed is on position: " + pos.toString());
                 source.sendFeedback(text, false);
+            } else {
+                source.sendError(PROFESSION_NOT_SET);
+            }
+        } else {
+            source.sendError(NO_NPC_SELECTED);
+        }
+        return 0;
+    }
+
+    private static int setRequireBed(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        ServerCommandSource source = ctx.getSource();
+        TaterzenNPC npc = ((ITaterzenEditor) source.getPlayer()).getNpc();
+        if (npc != null) {
+            SleeperProfession profession = (SleeperProfession) npc.getProfession(SleeperProfession.PROFESSION_ID);
+            if (profession != null) {
+                boolean require = BoolArgumentType.getBool(ctx, "required");
+                profession.setRequireBed(require);
+                source.sendFeedback(SUCCESS_MSG, false);
+            } else {
+                source.sendError(PROFESSION_NOT_SET);
+            }
+        } else {
+            source.sendError(NO_NPC_SELECTED);
+        }
+        return 0;
+    }
+
+    private static int getRequireBed(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        ServerCommandSource source = ctx.getSource();
+        TaterzenNPC npc = ((ITaterzenEditor) source.getPlayer()).getNpc();
+        if (npc != null) {
+            SleeperProfession profession = (SleeperProfession) npc.getProfession(SleeperProfession.PROFESSION_ID);
+            if (profession != null) {
+                boolean require = profession.doesRequireBed();
+                Text msg;
+                if (require) {
+                    msg = new LiteralText("NPC does require a bed to sleep");
+                } else {
+                    msg = new LiteralText("NPC does not require a bed to sleep").formatted(Formatting.ITALIC);
+                }
+                source.sendFeedback(msg, false);
             } else {
                 source.sendError(PROFESSION_NOT_SET);
             }
