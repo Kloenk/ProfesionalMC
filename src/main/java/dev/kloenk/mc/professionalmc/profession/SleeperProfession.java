@@ -166,15 +166,15 @@ public class SleeperProfession implements TaterzenProfession {
                     if (bed.get(BedBlock.PART) != BedPart.HEAD) {
                         realBedPos = realBedPos.offset((Direction) bed.get(BedBlock.FACING));
                     }
-                    realBedPos = realBedPos.add(0, 0.5625, 0);
+                    realBedPos = realBedPos.add(0.5, 0.6875, 0.5);
                 } else {
-                    realBedPos = realBedPos.add(0, 0.12, 0);
+                    realBedPos = realBedPos.add(0, 1.12, 0);
                 }
 
                 npc.getFakePlayer().sleep(bedPosition);
+                npc.teleport(realBedPos.getX(), realBedPos.getY(), realBedPos.getZ(), false);
                 npc.setPose(EntityPose.SLEEPING);
                 setMovement(Movement.NONE);
-                npc.teleport(realBedPos.getX() + 0.445, realBedPos.getY(), realBedPos.getZ() + 0.532, false);
                 isSleeping = true;
             } else {
                 LOGGER.info("Could not sleep, possible missing bed");
